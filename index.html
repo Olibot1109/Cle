@@ -1,184 +1,1048 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Jaystation</title>
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>cle</title>
+    <link rel="icon" href="docs/favicon.ico" sizes="16x16 32x32 48x48 64x64" type="image/vnd.microsoft.icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <link rel = icon href = docs/favicon.ico sizes = "16x16 32x32 48x48 64x64" type = image/vnd.microsoft.icon>
-        <meta name = viewport content = "width = device-width, initial-scale = 1">
+    <style>
+        :root {
+            --bg: #f5f3ef;
+            --ink: #1c1b18;
+            --muted: #6d675f;
+            --panel: #ffffff;
+            --border: #e2ded7;
+            --accent: #1c1b18;
+            --accent-soft: #f0ece6;
+            --shadow: 0 16px 40px rgba(15, 12, 9, 0.12);
+            --radius: 14px;
+            --focus: #b5a99a;
+        }
 
-        <style>
-            body, html {
-                height: 100%;
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            font-family: "IBM Plex Mono", "Menlo", monospace;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 12% 10%, #f8f6f1 0%, transparent 50%),
+                radial-gradient(circle at 86% 18%, #efeae2 0%, transparent 50%),
+                var(--bg);
+        }
+
+        @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&display=swap");
+
+        body[data-theme="dark"] {
+            --bg: #0e0f12;
+            --ink: #f1ece4;
+            --muted: #a7a199;
+            --panel: #15171c;
+            --border: #2b2f36;
+            --accent: #f1ece4;
+            --accent-soft: #1f232b;
+            --shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+            --focus: #d7c8b0;
+            background:
+                radial-gradient(circle at 12% 10%, rgba(255, 255, 255, 0.06) 0%, transparent 55%),
+                radial-gradient(circle at 86% 18%, rgba(255, 255, 255, 0.04) 0%, transparent 55%),
+                var(--bg);
+        }
+
+        body.in-game {
+            overflow: hidden;
+        }
+
+        body.in-game main.shell {
+            display: none;
+        }
+
+        .shell {
+            min-height: 100vh;
+            padding: clamp(1rem, 2.2vw, 2.2rem);
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: clamp(1rem, 2vw, 1.6rem);
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            background: var(--accent-soft);
+            border: 1px solid var(--border);
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(1.4rem, 2.2vw, 2rem);
+        }
+
+        .tagline {
+            margin: 0.25rem 0 0;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .dropzone {
+            position: relative;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: clamp(1.2rem, 3.2vw, 2.4rem);
+            display: grid;
+            place-items: center;
+            box-shadow: var(--shadow);
+            min-height: clamp(14rem, 40vh, 18rem);
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .dropzone::after {
+            content: "";
+            position: absolute;
+            inset: 1rem;
+            border-radius: calc(var(--radius) - 6px);
+            border: 1px dashed rgba(28, 27, 24, 0.16);
+            pointer-events: none;
+        }
+
+        .dropzone[drag] {
+            border-color: rgba(28, 27, 24, 0.55);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 48px rgba(15, 12, 9, 0.16);
+        }
+
+        #input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .content {
+            text-align: center;
+            max-width: 420px;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.35rem 0.9rem;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            border: 1px solid var(--border);
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            margin-bottom: 1rem;
+        }
+
+        .content h2 {
+            margin: 0 0 0.75rem;
+            font-size: clamp(1.3rem, 2vw, 1.8rem);
+        }
+
+        .content p {
+            margin: 0 0 1.5rem;
+            color: var(--muted);
+        }
+
+        .support {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .chip {
+            padding: 0.35rem 0.7rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: #faf8f4;
+            font-size: 0.75rem;
+            color: var(--muted);
+            font-weight: 600;
+            transition: transform 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+
+        .chip:hover {
+            transform: translateY(-1px);
+            border-color: rgba(28, 27, 24, 0.25);
+            color: var(--ink);
+        }
+
+        button {
+            border: 1px solid var(--accent);
+            background: var(--accent);
+            color: #fffaf2;
+            padding: 0.75rem 1.4rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+            box-shadow: 0 10px 24px rgba(28, 27, 24, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            cursor: default;
+            opacity: 0.6;
+            transform: none;
+            box-shadow: none;
+        }
+
+        button:focus-visible {
+            outline: 2px solid var(--focus);
+            outline-offset: 3px;
+        }
+
+        button.secondary {
+            background: transparent;
+            color: var(--ink);
+            border-color: var(--border);
+            box-shadow: none;
+        }
+
+        button.secondary:hover {
+            box-shadow: 0 8px 20px rgba(15, 12, 9, 0.12);
+        }
+
+        button.compact {
+            padding: 0.55rem 1rem;
+            font-size: 0.85rem;
+            box-shadow: none;
+        }
+
+        select {
+            appearance: none;
+            padding: 0.65rem 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--ink);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            width: min(320px, 90vw);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        select:focus-visible {
+            outline: 2px solid var(--focus);
+            outline-offset: 2px;
+            border-color: transparent;
+            box-shadow: 0 0 0 2px rgba(181, 169, 154, 0.35);
+        }
+
+        body[data-theme="dark"] .dropzone::after {
+            border-color: rgba(241, 236, 228, 0.18);
+        }
+
+        body[data-theme="dark"] .dropzone[drag] {
+            border-color: rgba(241, 236, 228, 0.45);
+        }
+
+        body[data-theme="dark"] .chip {
+            background: #1b1f26;
+            border-color: #2b2f36;
+            color: #c9c3ba;
+        }
+
+        body[data-theme="dark"] .chip:hover {
+            border-color: rgba(241, 236, 228, 0.35);
+            color: #f1ece4;
+        }
+
+        body[data-theme="dark"] button {
+            background: #2a2f38;
+            border-color: #3a414d;
+            color: #f1ece4;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+        }
+
+        body[data-theme="dark"] button.secondary {
+            background: transparent;
+            color: var(--ink);
+            border-color: var(--border);
+            box-shadow: none;
+        }
+
+        body[data-theme="dark"] select {
+            background: #161a21;
+            color: var(--ink);
+            border-color: #2b2f36;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        .choose-core {
+            display: grid;
+            gap: 1rem;
+            text-align: center;
+            max-width: 360px;
+        }
+
+        .resume {
+            display: grid;
+            gap: 0.75rem;
+            padding: 0.85rem 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: linear-gradient(135deg, rgba(28, 27, 24, 0.06), rgba(28, 27, 24, 0.02));
+            margin-bottom: 1rem;
+        }
+
+        body[data-theme="dark"] .resume {
+            background: linear-gradient(135deg, rgba(241, 236, 228, 0.12), rgba(241, 236, 228, 0.04));
+        }
+
+        .resume h3 {
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .resume p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        .resume-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .choose-core h3 {
+            margin: 0;
+        }
+
+        .choose-core p {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        .recent {
+            border-top: 1px solid var(--border);
+            margin-top: 0.9rem;
+            padding-top: 0.9rem;
+        }
+
+        .recent h3 {
+            margin: 0 0 0.6rem;
+            font-size: 0.95rem;
+            color: var(--muted);
+        }
+
+        .recent ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 0.45rem;
+        }
+
+        .recent li {
+            font-size: 0.85rem;
+            color: var(--ink);
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+
+        .recent span {
+            color: var(--muted);
+        }
+
+        footer {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        @media (max-height: 800px) {
+            .resume {
+                gap: 0.55rem;
             }
 
-            body {
-                font-family: monospace;
-                font-weight: bold;
-                font-size: 20px;
-                margin: 0;
-                overflow: hidden;
-                background-color: #050505
+            .recent {
+                display: none;
             }
+        }
 
-            body, #box {
-                display: flex;
-                align-items: center;
-                justify-content: center;
+        #display {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: #000;
+            position: fixed;
+            inset: 0;
+        }
+
+        .loading-screen {
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.08), transparent 55%),
+                radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.06), transparent 55%),
+                #0b0b0b;
+            color: #f2ede5;
+            display: grid;
+            place-items: center;
+            z-index: 10;
+        }
+
+        .loading-card {
+            width: min(460px, 86vw);
+            padding: 2.4rem 2.2rem;
+            border-radius: 18px;
+            border: 1px solid rgba(242, 237, 229, 0.18);
+            background: rgba(8, 8, 8, 0.72);
+            backdrop-filter: blur(6px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+            text-align: center;
+        }
+
+        .loading-card h2 {
+            margin: 0 0 0.65rem;
+            font-size: 1.35rem;
+            letter-spacing: 0.04em;
+        }
+
+        .loading-card p {
+            margin: 0 0 1.4rem;
+            color: rgba(242, 237, 229, 0.72);
+            line-height: 1.5;
+        }
+
+        .loading-bar {
+            position: relative;
+            height: 10px;
+            border-radius: 999px;
+            background: rgba(242, 237, 229, 0.12);
+            overflow: hidden;
+        }
+
+        .loading-bar::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(242, 237, 229, 0.85), transparent);
+            transform: translateX(-100%);
+            animation: loading-sweep 1.4s ease-in-out infinite;
+        }
+
+        .loading-meta {
+            display: grid;
+            gap: 0.4rem;
+            margin: 1.2rem 0;
+            font-size: 0.85rem;
+            color: rgba(242, 237, 229, 0.75);
+        }
+
+        .loading-steps {
+            margin: 1.2rem 0 0;
+            padding: 0;
+            list-style: none;
+            display: grid;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+            color: rgba(242, 237, 229, 0.55);
+            text-align: left;
+        }
+
+        .loading-steps li {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .loading-steps li::before {
+            content: "•";
+            color: rgba(242, 237, 229, 0.35);
+        }
+
+        .loading-steps li.active {
+            color: rgba(242, 237, 229, 0.95);
+        }
+
+        .loading-steps li.active::before {
+            content: "●";
+            color: rgba(242, 237, 229, 0.95);
+        }
+
+        .loading-hint {
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: rgba(242, 237, 229, 0.55);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        @keyframes loading-sweep {
+            0% {
+                transform: translateX(-100%);
             }
+            50% {
+                transform: translateX(30%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
+        }
 
-            #box {
-                color: #aaa;
-                height: 20em;
-                width: 30em;
-                max-width: 80%;
-                max-height: 80%;
-                background-color: #000000;
-                border-radius: 0.4em;
-                border: 2px solid #555;
-                position: relative;
+        @media (max-width: 720px) {
+            header {
                 flex-direction: column;
-                transition-duration: 0.2s;
-                overflow: hidden
+                align-items: flex-start;
             }
 
-            #box:hover, #box[drag] {
-                border-color: rgb(254, 248, 248);
-                color: #ddd
+            .logo {
+                width: 46px;
+                height: 46px;
             }
 
-            #input {
-                cursor: pointer;
-                position: absolute;
-                left: 0;
-                top: 0;
+            .actions {
                 width: 100%;
-                height: 100%;
-                opacity: 0
+                justify-content: flex-start;
             }
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <header>
+            <div class="brand">
+                <div class="logo">CL</div>
+                <div>
+                    <h1>cle</h1>
+                    <p class="tagline">Just drop a ROM. Clean, quiet, ready.</p>
+                </div>
+            </div>
+            <div class="actions">
+                <div class="tagline">Local only · No uploads</div>
+                <button class="secondary compact" type="button" id="theme-toggle">Dark mode</button>
+            </div>
+        </header>
 
-            #display {
-                width: 100%;
-                height: 100%
+        <section id="box" class="dropzone" aria-live="polite">
+            <input type="file" id="input" aria-label="Choose a ROM file">
+            <div class="content">
+                <div class="pill">Drag & drop</div>
+                <h2>Load a retro game</h2>
+                <p>Drop a ROM and we’ll auto-detect the best core.</p>
+                <div class="resume" id="resume-card" hidden>
+                    <div>
+                        <h3>Resume last game</h3>
+                        <p id="resume-meta">No recent session stored.</p>
+                    </div>
+                    <div class="resume-actions">
+                        <button type="button" id="resume-btn">Resume</button>
+                        <button class="secondary compact" type="button" id="resume-clear">Clear</button>
+                    </div>
+                </div>
+                <div class="support">
+                    <span class="chip">NES</span>
+                    <span class="chip">SNES</span>
+                    <span class="chip">N64</span>
+                    <span class="chip">GB/GBC</span>
+                    <span class="chip">GBA</span>
+                    <span class="chip">NDS</span>
+                    <span class="chip">PSX</span>
+                    <span class="chip">PSP</span>
+                    <span class="chip">Genesis</span>
+                    <span class="chip">Sega CD</span>
+                    <span class="chip">Saturn</span>
+                    <span class="chip">3DO</span>
+                    <span class="chip">PC Engine</span>
+                    <span class="chip">Neo Geo Pocket</span>
+                    <span class="chip">Arcade</span>
+                    <span class="chip">Atari</span>
+                    <span class="chip">Atari 5200</span>
+                </div>
+                <button type="button" id="browse">Browse files</button>
+                <div class="recent" aria-live="polite">
+                    <h3>Recent picks</h3>
+                    <ul id="recent-list">
+                        <li><span>No recent games yet.</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            If the extension is unknown, you will be asked to choose a console core.
+        </footer>
+    </main>
+
+    <script>
+        const input = document.getElementById("input");
+        const box = document.getElementById("box");
+        const browse = document.getElementById("browse");
+        const recentList = document.getElementById("recent-list");
+        const resumeCard = document.getElementById("resume-card");
+        const resumeMeta = document.getElementById("resume-meta");
+        const resumeBtn = document.getElementById("resume-btn");
+        const resumeClear = document.getElementById("resume-clear");
+        const themeToggle = document.getElementById("theme-toggle");
+        const recentKey = "cle_recent";
+        const lastKey = "cle_last";
+        const themeKey = "cle_theme";
+
+        let inGame = false;
+
+        const coreNames = {
+            nes: "Nintendo Entertainment System",
+            snes: "Super Nintendo Entertainment System",
+            n64: "Nintendo 64",
+            gb: "Nintendo Game Boy / Game Boy Color",
+            gba: "Nintendo Game Boy Advance",
+            nds: "Nintendo DS",
+            psx: "PlayStation",
+            psp: "PlayStation Portable",
+            "3do": "3DO Interactive Multiplayer",
+            vb: "Virtual Boy",
+            segaMD: "Sega Mega Drive / Genesis",
+            segaMS: "Sega Master System",
+            segaGG: "Sega Game Gear",
+            segaCD: "Sega CD",
+            sega32x: "Sega 32X",
+            segaSaturn: "Sega Saturn",
+            pce: "PC Engine / TurboGrafx-16",
+            ngp: "Neo Geo Pocket / Color",
+            arcade: "Arcade (FBNeo)",
+            mame2003: "Arcade (MAME 2003)",
+            lynx: "Atari Lynx",
+            jaguar: "Atari Jaguar",
+            atari5200: "Atari 5200",
+            atari7800: "Atari 7800",
+            atari2600: "Atari 2600"
+        };
+
+        const applyTheme = (theme) => {
+            const resolved = theme || "light";
+            document.body.dataset.theme = resolved;
+            themeToggle.textContent = resolved === "dark" ? "Light mode" : "Dark mode";
+            try {
+                localStorage.setItem(themeKey, resolved);
+            } catch (error) {
+                // ignore storage errors
             }
+        };
 
-            select, button {
-                padding: 0.6em 0.4em;
-                margin: 0.5em;
-                width: 15em;
-                max-width: 100%;
-                font-family: monospace;
-                font-weight: bold;
-                font-size: 16px;
-                background-color: #444;
-                color: #0b0b0b;
-                border-radius: 0.4em;
-                border: 1px solid #555;
-                cursor: pointer;
-                transition-duration: 0.2s
+        const initTheme = () => {
+            let stored = null;
+            try {
+                stored = localStorage.getItem(themeKey);
+            } catch (error) {
+                stored = null;
             }
-
-            select:hover, button:hover {
-                background-color: #666;
-                color: #ddd
+            if (stored === "dark" || stored === "light") {
+                applyTheme(stored);
+                return;
             }
-        </style>
-    </head>
+            const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+            applyTheme(prefersDark ? "dark" : "light");
+        };
 
-    <body>
-        <div id = box>
-            <input type = file id = input>
-          Select Game<b/>
-          <a href="https://imgbb.com/"><img src="https://i.ibb.co/wwJDrFk/giphy.gif" alt="giphy" width="100%" height="320px" border="0"></a>
-        <script type="7782ca3165d93269958403c6-text/javascript">
-            input.onchange = async () => {
-                const url = URL.createObjectURL(new Blob([input.files[0]]))
-                const parts = input.files[0].name.split(".")
+        themeToggle.addEventListener("click", () => {
+            const next = document.body.dataset.theme === "dark" ? "light" : "dark";
+            applyTheme(next);
+        });
 
-                const core = await (async (ext) => {
-                    if (["fds", "nes", "unif", "unf"].includes(ext))
-                        return "nes"
+        const formatBytes = (bytes) => {
+            if (!Number.isFinite(bytes)) return "Unknown size";
+            const units = ["B", "KB", "MB", "GB"];
+            let value = bytes;
+            let idx = 0;
+            while (value >= 1024 && idx < units.length - 1) {
+                value /= 1024;
+                idx += 1;
+            }
+            return `${value.toFixed(value >= 10 || idx === 0 ? 0 : 1)} ${units[idx]}`;
+        };
 
-                    if (["smc", "fig", "sfc", "gd3", "gd7", "dx2", "bsx", "swc"].includes(ext))
-                        return "snes"
+        const openStore = () => new Promise((resolve, reject) => {
+            if (!("indexedDB" in window)) {
+                reject(new Error("IndexedDB not available"));
+                return;
+            }
+            const request = indexedDB.open("cle", 1);
+            request.onupgradeneeded = () => {
+                request.result.createObjectStore("roms");
+            };
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
 
-                    if (["z64", "n64"].includes(ext))
-                        return "n64"
+        const storeBlob = async (key, value) => {
+            const db = await openStore();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction("roms", "readwrite");
+                tx.objectStore("roms").put(value, key);
+                tx.oncomplete = () => resolve();
+                tx.onerror = () => reject(tx.error);
+            });
+        };
 
-                    if (["nds", "gba", "gb", "z64", "n64"].includes(ext))
-                        return ext
+        const readBlob = async (key) => {
+            const db = await openStore();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction("roms", "readonly");
+                const req = tx.objectStore("roms").get(key);
+                req.onsuccess = () => resolve(req.result || null);
+                req.onerror = () => reject(req.error);
+            });
+        };
 
-                    return await new Promise(resolve => {
-                        const cores = {
-                            "Nintendo 64": "n64",
-                            "Nintendo Game Boy": "gb",
-                            "Nintendo Game Boy Advance": "gba",
-                            "Nintendo DS": "nds",
-                            "Nintendo Entertainment System": "nes",
-                            "Super Nintendo Entertainment System": "snes",
-                            "PlayStation": "psx",
-                            "Virtual Boy": "vb",
-                            "Sega Mega Drive": "segaMD",
-                            "Sega Master System": "segaMS",
-                            "Sega CD": "segaCD",
-                            "Atari Lynx": "lynx",
-                            "Sega 32X": "sega32x",
-                            "Atari Jaguar": "jaguar",
-                            "Sega Game Gear": "segaGG",
-                            "Sega Saturn": "segaSaturn",
-                            "Atari 7800": "atari7800",
-                            "Atari 2600": "atari2600"
-                        }
+        const clearBlob = async (key) => {
+            const db = await openStore();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction("roms", "readwrite");
+                tx.objectStore("roms").delete(key);
+                tx.oncomplete = () => resolve();
+                tx.onerror = () => reject(tx.error);
+            });
+        };
 
-                        const button = document.createElement("button")
-                        const select = document.createElement("select")
-
-                        for (const type in cores) {
-                            const option = document.createElement("option")
-
-                            option.value = cores[type]
-                            option.textContent = type
-                            select.appendChild(option)
-                        }
-
-                        button.onclick = () => resolve(select[select.selectedIndex].value)
-                        button.textContent = "Load game"
-                        box.innerHTML = ""
-
-                        box.appendChild(select)
-                        box.appendChild(button)
-                    })
-                })(parts.pop())
-
-                const div = document.createElement("div")
-                const sub = document.createElement("div")
-                const script = document.createElement("script")
-
-                sub.id = "game"
-                div.id = "display"
-
-                box.remove()
-                div.appendChild(sub)
-                document.body.appendChild(div)
-
-                window.EJS_player = "#game"
-                window.EJS_gameName = parts.shift()
-                window.EJS_biosUrl = ""
-                window.EJS_gameUrl = url
-                window.EJS_core = core
-                window.EJS_pathtodata = "data/"
-                window.EJS_startOnLoaded = true;
-
-                if (window.location.hostname === "demo.emulatorjs.org") {
-                    window.EJS_AdUrl = "https://ads.emulatorjs.org/";
+        const loadRecent = () => {
+            try {
+                const parsed = JSON.parse(localStorage.getItem(recentKey) || "[]");
+                if (!Array.isArray(parsed) || parsed.length === 0) {
+                    recentList.innerHTML = "<li><span>No recent games yet.</span></li>";
+                    return;
                 }
-                
+                recentList.innerHTML = "";
+                parsed.slice(0, 5).forEach(item => {
+                    const li = document.createElement("li");
+                    li.textContent = item.name;
+                    const meta = document.createElement("span");
+                    meta.textContent = `${item.coreLabel} · ${item.size}`;
+                    li.appendChild(meta);
+                    recentList.appendChild(li);
+                });
+            } catch (error) {
+                recentList.innerHTML = "<li><span>No recent games yet.</span></li>";
+            }
+        };
 
-                script.src = "data/loader.js"
-                document.body.appendChild(script)
+        const loadLastSession = () => {
+            try {
+                return JSON.parse(localStorage.getItem(lastKey) || "null");
+            } catch (error) {
+                return null;
+            }
+        };
+
+        const updateResumeCard = async () => {
+            const last = loadLastSession();
+            if (!last) {
+                resumeCard.hidden = true;
+                return;
+            }
+            resumeCard.hidden = false;
+            const date = last.updatedAt ? new Date(last.updatedAt) : null;
+            const dateLabel = date ? date.toLocaleString() : "Recently";
+            resumeMeta.textContent = `${last.name} · ${last.coreLabel} · ${last.size} · ${dateLabel}`;
+            resumeBtn.disabled = false;
+        };
+
+        const saveRecent = (entry) => {
+            try {
+                const current = JSON.parse(localStorage.getItem(recentKey) || "[]");
+                const next = [entry, ...current.filter(item => item.name !== entry.name)];
+                localStorage.setItem(recentKey, JSON.stringify(next.slice(0, 5)));
+                loadRecent();
+            } catch (error) {
+                // ignore storage errors
+            }
+        };
+
+        const saveLastSession = async (entry, file) => {
+            try {
+                localStorage.setItem(lastKey, JSON.stringify(entry));
+                await storeBlob("last", file);
+                updateResumeCard();
+            } catch (error) {
+                // ignore storage errors
+            }
+        };
+
+        loadRecent();
+        initTheme();
+        updateResumeCard();
+
+        browse.addEventListener("click", () => input.click());
+
+        resumeBtn.addEventListener("click", async () => {
+            resumeBtn.disabled = true;
+            resumeBtn.textContent = "Loading...";
+            try {
+                const last = loadLastSession();
+                if (!last) {
+                    resumeBtn.textContent = "Resume";
+                    return;
+                }
+                const stored = await readBlob("last");
+                if (!stored) {
+                    resumeMeta.textContent = "Resume data not found. Please reselect the ROM.";
+                    resumeBtn.textContent = "Resume";
+                    return;
+                }
+                const blob = stored instanceof Blob ? stored : stored.blob || stored;
+                const file = new File([blob], last.name, { type: blob.type || "application/octet-stream" });
+                await handleFile(file, { coreOverride: last.core });
+            } catch (error) {
+                resumeMeta.textContent = "Resume failed. Please reselect the ROM.";
+            } finally {
+                resumeBtn.textContent = "Resume";
+                resumeBtn.disabled = false;
+            }
+        });
+
+        resumeClear.addEventListener("click", async () => {
+            try {
+                localStorage.removeItem(lastKey);
+                await clearBlob("last");
+            } catch (error) {
+                // ignore errors
+            }
+            resumeCard.hidden = true;
+        });
+
+        const pickCore = (title, message, options) => new Promise(resolve => {
+            const button = document.createElement("button");
+            const select = document.createElement("select");
+            const wrapper = document.createElement("div");
+
+            wrapper.className = "choose-core";
+            wrapper.innerHTML = `
+                <h3>${title}</h3>
+                <p>${message}</p>
+            `;
+
+            options.forEach(({ label, value }) => {
+                const option = document.createElement("option");
+                option.value = value;
+                option.textContent = label;
+                select.appendChild(option);
+            });
+
+            button.onclick = () => resolve(select[select.selectedIndex].value);
+            button.textContent = "Load game";
+            box.innerHTML = "";
+
+            wrapper.appendChild(select);
+            wrapper.appendChild(button);
+            box.appendChild(wrapper);
+        });
+
+        const detectCore = async (ext) => {
+            const extension = (ext || "").toLowerCase();
+            if (["fds", "nes", "unif", "unf"].includes(extension)) return "nes";
+            if (["smc", "sfc", "fig", "bsx", "swc"].includes(extension)) return "snes";
+            if (["z64", "n64", "v64"].includes(extension)) return "n64";
+            if (["gb", "gbc", "cgb"].includes(extension)) return "gb";
+            if (["gba"].includes(extension)) return "gba";
+            if (["nds"].includes(extension)) return "nds";
+            if (["vb"].includes(extension)) return "vb";
+            if (["gen", "smd", "md"].includes(extension)) return "segaMD";
+            if (["sms"].includes(extension)) return "segaMS";
+            if (["gg"].includes(extension)) return "segaGG";
+            if (["32x", "x32"].includes(extension)) return "sega32x";
+            if (["pce"].includes(extension)) return "pce";
+            if (["ngp", "ngc"].includes(extension)) return "ngp";
+            if (["lnx"].includes(extension)) return "lynx";
+            if (["a52"].includes(extension)) return "atari5200";
+            if (["a26"].includes(extension)) return "atari2600";
+            if (["a78"].includes(extension)) return "atari7800";
+            if (["j64", "jag"].includes(extension)) return "jaguar";
+
+            if (["bin", "cue", "iso", "img", "chd"].includes(extension)) {
+                return await pickCore(
+                    "Pick the console core",
+                    "This file type is shared across multiple systems.",
+                    Object.entries(coreNames).map(([value, label]) => ({ label, value }))
+                );
             }
 
-            box.ondragover = () => box.setAttribute("drag", true)
-            box.ondragleave = () => box.removeAttribute("drag")
-        </script>
-    <!-- Cloudflare Pages Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "c1c16baac40644aa82bf95f7bf79eb6b"}' type="7782ca3165d93269958403c6-text/javascript"></script><!-- Cloudflare Pages Analytics --><script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="7782ca3165d93269958403c6-|49" defer></script><script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9db2ebdbdb05a580',t:'MTc3MzMxOTc5MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+            return await pickCore(
+                "Choose a console core",
+                "We couldn’t auto-detect this extension. Pick the closest match.",
+                Object.entries(coreNames).map(([value, label]) => ({ label, value }))
+            );
+        };
+
+        const createLoadingOverlay = (fileName, sizeLabel, coreLabel) => {
+            const loading = document.createElement("div");
+            loading.className = "loading-screen";
+            loading.innerHTML = `
+                <div class="loading-card">
+                    <h2>Loading your game</h2>
+                    <p>Fetching game data and warming up the emulator.</p>
+                    <div class="loading-bar" aria-hidden="true"></div>
+                    <div class="loading-meta">
+                        <div>${fileName}</div>
+                        <div>${coreLabel} · ${sizeLabel}</div>
+                    </div>
+                    <ul class="loading-steps">
+                        <li data-step="file">Reading local file</li>
+                        <li data-step="core">Detecting system core</li>
+                        <li data-step="engine">Loading emulator engine</li>
+                        <li data-step="start">Starting game</li>
+                    </ul>
+                    <div class="loading-hint">Please wait</div>
+                </div>
+            `;
+            return loading;
+        };
+
+        const setActiveStep = (overlay, step) => {
+            const items = overlay.querySelectorAll(".loading-steps li");
+            items.forEach(item => {
+                if (item.dataset.step === step) {
+                    item.classList.add("active");
+                } else {
+                    item.classList.remove("active");
+                }
+            });
+        };
+
+        const handleFile = async (file, options = {}) => {
+            if (!file) return;
+
+            const parts = file.name.split(".");
+            const ext = parts.length > 1 ? parts.pop() : "";
+            const baseName = parts.join(".") || file.name;
+
+            const sizeLabel = formatBytes(file.size);
+            const url = URL.createObjectURL(new Blob([file]));
+
+            const core = options.coreOverride || await detectCore(ext);
+            const coreLabel = coreNames[core] || "Custom core";
+
+            const div = document.createElement("div");
+            const sub = document.createElement("div");
+            const script = document.createElement("script");
+            const loading = createLoadingOverlay(file.name, sizeLabel, coreLabel);
+
+            sub.id = "game";
+            div.id = "display";
+
+            inGame = true;
+            document.body.classList.add("in-game");
+            box.remove();
+            div.appendChild(sub);
+            div.appendChild(loading);
+            document.body.appendChild(div);
+
+            setActiveStep(loading, "file");
+
+            window.EJS_player = "#game";
+            window.EJS_gameName = baseName;
+            window.EJS_biosUrl = "";
+            window.EJS_gameUrl = url;
+            window.EJS_core = core;
+            window.EJS_pathtodata = "data/";
+            window.EJS_startOnLoaded = true;
+            window.EJS_ready = () => loading.remove();
+            window.EJS_onGameStart = () => loading.remove();
+
+            saveRecent({ name: file.name, size: sizeLabel, coreLabel });
+            saveLastSession({
+                name: file.name,
+                size: sizeLabel,
+                core,
+                coreLabel,
+                updatedAt: Date.now()
+            }, file);
+
+            setActiveStep(loading, "core");
+
+            script.src = "data/loader.js";
+            script.onload = () => setActiveStep(loading, "engine");
+            document.body.appendChild(script);
+
+            setTimeout(() => setActiveStep(loading, "start"), 1500);
+            setTimeout(() => {
+                if (document.body.contains(loading)) {
+                    const hint = loading.querySelector(".loading-hint");
+                    if (hint) hint.textContent = "Still loading — hang tight";
+                }
+            }, 12000);
+        };
+
+        input.onchange = async () => {
+            if (!input.files || !input.files[0]) return;
+            await handleFile(input.files[0]);
+        };
+
+        const preventDefaults = (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+        };
+
+        box.addEventListener("dragover", (event) => {
+            preventDefaults(event);
+            box.setAttribute("drag", "true");
+        });
+        box.addEventListener("dragleave", () => box.removeAttribute("drag"));
+        box.addEventListener("drop", async (event) => {
+            preventDefaults(event);
+            box.removeAttribute("drag");
+            const file = event.dataTransfer?.files?.[0];
+            await handleFile(file);
+        });
+
+        document.addEventListener("keydown", (event) => {
+            if (!inGame) return;
+            const blocked = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " ", "PageUp", "PageDown", "Home", "End"];
+            if (blocked.includes(event.key)) {
+                event.preventDefault();
+            }
+        });
+    </script>
+</body>
 </html>
