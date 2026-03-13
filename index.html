@@ -3,10 +3,12 @@
 <head>
     <meta charset="utf-8">
     <title>cle</title>
-    <link rel="icon" href="docs/favicon.ico" sizes="16x16 32x32 48x48 64x64" type="image/vnd.microsoft.icon">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
+        @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&display=swap");
+
         :root {
             --bg: #f5f3ef;
             --ink: #1c1b18;
@@ -15,30 +17,28 @@
             --border: #e2ded7;
             --accent: #1c1b18;
             --accent-soft: #f0ece6;
-            --shadow: 0 16px 40px rgba(15, 12, 9, 0.12);
-            --radius: 14px;
+            --shadow: 0 16px 40px rgba(15,12,9,.12);
+            --radius: 16px;
             --focus: #b5a99a;
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --safe-left: env(safe-area-inset-left, 0px);
+            --safe-right: env(safe-area-inset-right, 0px);
         }
 
-        * {
-            box-sizing: border-box;
-        }
-
-        html, body {
-            height: 100%;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { height: 100%; margin: 0; }
 
         body {
-            margin: 0;
             font-family: "IBM Plex Mono", "Menlo", monospace;
             color: var(--ink);
             background:
                 radial-gradient(circle at 12% 10%, #f8f6f1 0%, transparent 50%),
                 radial-gradient(circle at 86% 18%, #efeae2 0%, transparent 50%),
                 var(--bg);
+            /* prevent overscroll bounce interfering with game */
+            overscroll-behavior: none;
         }
-
-        @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&display=swap");
 
         body[data-theme="dark"] {
             --bg: #0e0f12;
@@ -48,506 +48,335 @@
             --border: #2b2f36;
             --accent: #f1ece4;
             --accent-soft: #1f232b;
-            --shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+            --shadow: 0 18px 50px rgba(0,0,0,.5);
             --focus: #d7c8b0;
             background:
-                radial-gradient(circle at 12% 10%, rgba(255, 255, 255, 0.06) 0%, transparent 55%),
-                radial-gradient(circle at 86% 18%, rgba(255, 255, 255, 0.04) 0%, transparent 55%),
+                radial-gradient(circle at 12% 10%, rgba(255,255,255,.06) 0%, transparent 55%),
+                radial-gradient(circle at 86% 18%, rgba(255,255,255,.04) 0%, transparent 55%),
                 var(--bg);
         }
 
-        body.in-game {
-            overflow: hidden;
-        }
+        body.in-game { overflow: hidden; }
+        body.in-game main.shell { display: none; }
 
-        body.in-game main.shell {
-            display: none;
-        }
-
+        /* ── Shell layout ── */
         .shell {
             min-height: 100vh;
-            padding: clamp(1rem, 2.2vw, 2.2rem);
+            /* respect notch / home bar */
+            padding: calc(var(--safe-top) + clamp(.9rem,2vw,2rem))
+                     calc(var(--safe-right) + clamp(1rem,3vw,2.4rem))
+                     calc(var(--safe-bottom) + clamp(.9rem,2vw,1.6rem))
+                     calc(var(--safe-left) + clamp(1rem,3vw,2.4rem));
             display: grid;
             grid-template-rows: auto 1fr auto;
-            gap: clamp(1rem, 2vw, 1.6rem);
+            gap: clamp(.9rem,2vw,1.6rem);
         }
 
+        /* ── Header ── */
         header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 1rem;
+            flex-wrap: wrap;
         }
 
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
+        .brand { display: flex; align-items: center; gap: 1rem; }
 
         .logo {
-            width: 52px;
-            height: 52px;
-            border-radius: 12px;
+            width: 56px; height: 56px;
+            border-radius: 14px;
             background: var(--accent-soft);
             border: 1px solid var(--border);
-            display: grid;
-            place-items: center;
-            font-weight: 700;
-            letter-spacing: 0.1em;
+            display: grid; place-items: center;
+            font-weight: 700; font-size: 1rem;
+            letter-spacing: .1em;
+            flex-shrink: 0;
         }
 
-        h1 {
-            margin: 0;
-            font-size: clamp(1.4rem, 2.2vw, 2rem);
-        }
-
-        .tagline {
-            margin: 0.25rem 0 0;
-            color: var(--muted);
-            font-size: 0.95rem;
-        }
+        h1 { margin: 0; font-size: clamp(1.5rem,2.5vw,2.2rem); }
+        .tagline { margin: .2rem 0 0; color: var(--muted); font-size: .95rem; }
 
         .actions {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            flex-wrap: wrap;
+            display: flex; align-items: center;
+            gap: .75rem; flex-wrap: wrap;
             justify-content: flex-end;
         }
 
+        /* ── Drop zone ── */
         .dropzone {
             position: relative;
             background: var(--panel);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: clamp(1.2rem, 3.2vw, 2.4rem);
+            padding: clamp(1.4rem,3.5vw,2.8rem) clamp(1.2rem,3vw,2.4rem);
             display: grid;
             place-items: center;
             box-shadow: var(--shadow);
-            min-height: clamp(14rem, 40vh, 18rem);
-            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            /* tall enough to breathe on iPad */
+            min-height: clamp(16rem,42vh,22rem);
+            transition: transform .2s, border-color .2s, box-shadow .2s;
         }
 
         .dropzone::after {
             content: "";
-            position: absolute;
-            inset: 1rem;
+            position: absolute; inset: 1rem;
             border-radius: calc(var(--radius) - 6px);
-            border: 1px dashed rgba(28, 27, 24, 0.16);
+            border: 1px dashed rgba(28,27,24,.16);
             pointer-events: none;
         }
 
+        body[data-theme="dark"] .dropzone::after { border-color: rgba(241,236,228,.18); }
+
         .dropzone[drag] {
-            border-color: rgba(28, 27, 24, 0.55);
+            border-color: rgba(28,27,24,.55);
             transform: translateY(-2px);
-            box-shadow: 0 20px 48px rgba(15, 12, 9, 0.16);
+            box-shadow: 0 20px 48px rgba(15,12,9,.16);
         }
 
-        #input {
-            position: absolute;
-            inset: 0;
-            opacity: 0;
-            cursor: pointer;
-        }
+        body[data-theme="dark"] .dropzone[drag] { border-color: rgba(241,236,228,.45); }
 
-        .content {
-            text-align: center;
-            max-width: 420px;
-        }
+        #input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+        .content { text-align: center; max-width: 460px; width: 100%; }
 
         .pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 0.35rem 0.9rem;
+            display: inline-flex; align-items: center; gap: .4rem;
+            padding: .35rem .9rem;
             border-radius: 999px;
             background: var(--accent-soft);
             border: 1px solid var(--border);
-            font-size: 0.85rem;
-            font-weight: 600;
-            letter-spacing: 0.02em;
-            margin-bottom: 1rem;
+            font-size: .85rem; font-weight: 600;
+            letter-spacing: .02em; margin-bottom: 1rem;
         }
 
-        .content h2 {
-            margin: 0 0 0.75rem;
-            font-size: clamp(1.3rem, 2vw, 1.8rem);
-        }
+        .content h2 { margin: 0 0 .75rem; font-size: clamp(1.3rem,2.2vw,1.9rem); }
+        .content p { margin: 0 0 1.5rem; color: var(--muted); line-height: 1.5; }
 
-        .content p {
-            margin: 0 0 1.5rem;
-            color: var(--muted);
-        }
-
+        /* ── Console chips ── */
         .support {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.35rem;
-            justify-content: center;
+            display: flex; flex-wrap: wrap;
+            gap: .35rem; justify-content: center;
             margin-bottom: 1rem;
         }
 
         .chip {
-            padding: 0.35rem 0.7rem;
+            padding: .4rem .8rem;
             border-radius: 999px;
             border: 1px solid var(--border);
             background: #faf8f4;
-            font-size: 0.75rem;
-            color: var(--muted);
+            font-size: .78rem; color: var(--muted);
             font-weight: 600;
-            transition: transform 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+            /* larger tap target on touch */
+            min-height: 36px;
+            display: flex; align-items: center;
+            transition: transform .15s, border-color .15s, color .15s;
         }
 
-        .chip:hover {
-            transform: translateY(-1px);
-            border-color: rgba(28, 27, 24, 0.25);
-            color: var(--ink);
-        }
+        .chip:hover { transform: translateY(-1px); border-color: rgba(28,27,24,.25); color: var(--ink); }
+        body[data-theme="dark"] .chip { background: #1b1f26; border-color: #2b2f36; color: #c9c3ba; }
+        body[data-theme="dark"] .chip:hover { border-color: rgba(241,236,228,.35); color: #f1ece4; }
 
+        /* ── Buttons – bigger tap targets for iPad ── */
         button {
             border: 1px solid var(--accent);
             background: var(--accent);
             color: #fffaf2;
-            padding: 0.75rem 1.4rem;
-            border-radius: 10px;
+            padding: .85rem 1.6rem;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
-            box-shadow: 0 10px 24px rgba(28, 27, 24, 0.2);
+            /* min 44 px touch target (Apple HIG) */
+            min-height: 48px;
+            transition: transform .2s, box-shadow .2s, opacity .2s;
+            box-shadow: 0 10px 24px rgba(28,27,24,.2);
+            -webkit-appearance: none;
         }
 
-        button:hover {
-            transform: translateY(-1px);
-        }
-
-        button:disabled {
-            cursor: default;
-            opacity: 0.6;
-            transform: none;
-            box-shadow: none;
-        }
-
-        button:focus-visible {
-            outline: 2px solid var(--focus);
-            outline-offset: 3px;
-        }
+        button:hover { transform: translateY(-1px); }
+        button:active { transform: scale(.97); }
+        button:disabled { cursor: default; opacity: .6; transform: none; box-shadow: none; }
+        button:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
 
         button.secondary {
-            background: transparent;
-            color: var(--ink);
-            border-color: var(--border);
-            box-shadow: none;
+            background: transparent; color: var(--ink);
+            border-color: var(--border); box-shadow: none;
         }
+        button.secondary:hover { box-shadow: 0 8px 20px rgba(15,12,9,.12); }
 
-        button.secondary:hover {
-            box-shadow: 0 8px 20px rgba(15, 12, 9, 0.12);
-        }
-
-        button.compact {
-            padding: 0.55rem 1rem;
-            font-size: 0.85rem;
-            box-shadow: none;
-        }
-
-        select {
-            appearance: none;
-            padding: 0.65rem 1rem;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            background: #fff;
-            color: var(--ink);
-            font-weight: 600;
-            margin-bottom: 1rem;
-            width: min(320px, 90vw);
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        select:focus-visible {
-            outline: 2px solid var(--focus);
-            outline-offset: 2px;
-            border-color: transparent;
-            box-shadow: 0 0 0 2px rgba(181, 169, 154, 0.35);
-        }
-
-        body[data-theme="dark"] .dropzone::after {
-            border-color: rgba(241, 236, 228, 0.18);
-        }
-
-        body[data-theme="dark"] .dropzone[drag] {
-            border-color: rgba(241, 236, 228, 0.45);
-        }
-
-        body[data-theme="dark"] .chip {
-            background: #1b1f26;
-            border-color: #2b2f36;
-            color: #c9c3ba;
-        }
-
-        body[data-theme="dark"] .chip:hover {
-            border-color: rgba(241, 236, 228, 0.35);
-            color: #f1ece4;
-        }
+        button.compact { padding: .6rem 1.1rem; font-size: .88rem; box-shadow: none; min-height: 40px; }
 
         body[data-theme="dark"] button {
-            background: #2a2f38;
-            border-color: #3a414d;
-            color: #f1ece4;
-            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+            background: #2a2f38; border-color: #3a414d;
+            color: #f1ece4; box-shadow: 0 10px 24px rgba(0,0,0,.35);
         }
+        body[data-theme="dark"] button.secondary { background: transparent; color: var(--ink); border-color: var(--border); box-shadow: none; }
 
-        body[data-theme="dark"] button.secondary {
-            background: transparent;
-            color: var(--ink);
-            border-color: var(--border);
-            box-shadow: none;
-        }
-
-        body[data-theme="dark"] select {
-            background: #161a21;
-            color: var(--ink);
-            border-color: #2b2f36;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-
-        .choose-core {
-            display: grid;
-            gap: 1rem;
-            text-align: center;
-            max-width: 360px;
-        }
-
-        .resume {
-            display: grid;
-            gap: 0.75rem;
-            padding: 0.85rem 1rem;
+        /* ── Select ── */
+        select {
+            -webkit-appearance: none; appearance: none;
+            padding: .75rem 1.1rem;
             border-radius: 12px;
             border: 1px solid var(--border);
-            background: linear-gradient(135deg, rgba(28, 27, 24, 0.06), rgba(28, 27, 24, 0.02));
+            background: #fff; color: var(--ink);
+            font-family: inherit; font-size: 1rem; font-weight: 600;
+            margin-bottom: 1rem;
+            width: min(340px, 90vw);
+            min-height: 48px;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        select:focus-visible {
+            outline: 2px solid var(--focus); outline-offset: 2px;
+            border-color: transparent;
+            box-shadow: 0 0 0 2px rgba(181,169,154,.35);
+        }
+        body[data-theme="dark"] select { background: #161a21; color: var(--ink); border-color: #2b2f36; }
+
+        /* ── Resume card ── */
+        .resume {
+            display: grid; gap: .75rem;
+            padding: .9rem 1rem;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: linear-gradient(135deg, rgba(28,27,24,.06), rgba(28,27,24,.02));
             margin-bottom: 1rem;
         }
-
         body[data-theme="dark"] .resume {
-            background: linear-gradient(135deg, rgba(241, 236, 228, 0.12), rgba(241, 236, 228, 0.04));
+            background: linear-gradient(135deg, rgba(241,236,228,.12), rgba(241,236,228,.04));
+        }
+        .resume h3 { margin: 0; font-size: .95rem; }
+        .resume p { margin: 0; color: var(--muted); font-size: .85rem; }
+        .resume-actions { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+
+        /* ── Recent list ── */
+        .recent { border-top: 1px solid var(--border); margin-top: .9rem; padding-top: .9rem; }
+        .recent h3 { margin: 0 0 .6rem; font-size: .95rem; color: var(--muted); }
+        .recent ul { list-style: none; padding: 0; margin: 0; display: grid; gap: .45rem; }
+        .recent li { font-size: .85rem; color: var(--ink); display: flex; justify-content: space-between; gap: .75rem; }
+        .recent span { color: var(--muted); }
+
+        /* ── Core picker ── */
+        .choose-core { display: grid; gap: 1rem; text-align: center; max-width: 380px; }
+        .choose-core h3 { margin: 0; }
+        .choose-core p { margin: 0; color: var(--muted); }
+
+        footer { color: var(--muted); font-size: .88rem; }
+
+        /* ── iPad-specific two-column layout ── */
+        @media (min-width: 768px) and (max-width: 1100px) {
+            .content { max-width: 520px; }
+
+            .support { gap: .45rem; }
+            .chip { font-size: .82rem; padding: .45rem .9rem; }
+
+            /* bigger text in hero area */
+            .content h2 { font-size: 2rem; }
+            .content p { font-size: 1rem; }
+
+            .dropzone { min-height: clamp(18rem,48vh,26rem); }
         }
 
-        .resume h3 {
-            margin: 0;
-            font-size: 0.95rem;
-        }
-
-        .resume p {
-            margin: 0;
-            color: var(--muted);
-            font-size: 0.85rem;
-        }
-
-        .resume-actions {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            flex-wrap: wrap;
-        }
-
-        .choose-core h3 {
-            margin: 0;
-        }
-
-        .choose-core p {
-            margin: 0;
-            color: var(--muted);
-        }
-
-        .recent {
-            border-top: 1px solid var(--border);
-            margin-top: 0.9rem;
-            padding-top: 0.9rem;
-        }
-
-        .recent h3 {
-            margin: 0 0 0.6rem;
-            font-size: 0.95rem;
-            color: var(--muted);
-        }
-
-        .recent ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: grid;
-            gap: 0.45rem;
-        }
-
-        .recent li {
-            font-size: 0.85rem;
-            color: var(--ink);
-            display: flex;
-            justify-content: space-between;
-            gap: 0.75rem;
-        }
-
-        .recent span {
-            color: var(--muted);
-        }
-
-        footer {
-            color: var(--muted);
-            font-size: 0.9rem;
+        /* landscape iPad: put recent + resume side by side */
+        @media (min-width: 900px) and (orientation: landscape) {
+            .content {
+                max-width: 700px;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: auto auto auto auto auto;
+                gap: 0 1.6rem;
+                text-align: left;
+            }
+            .pill    { grid-column: 1 / -1; justify-self: start; }
+            .content h2 { grid-column: 1 / -1; font-size: 1.9rem; }
+            .content > p { grid-column: 1 / -1; }
+            .resume  { grid-column: 1; grid-row: 4; }
+            .support { grid-column: 2; grid-row: 4; justify-content: flex-start; }
+            #browse  { grid-column: 1 / -1; justify-self: start; }
+            .recent  { grid-column: 1 / -1; }
         }
 
         @media (max-height: 800px) {
-            .resume {
-                gap: 0.55rem;
-            }
-
-            .recent {
-                display: none;
-            }
+            .recent { display: none; }
         }
 
+        /* ── Game display ── */
         #display {
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            background: #000;
-            position: fixed;
-            inset: 0;
+            width: 100vw; height: 100vh;
+            overflow: hidden; background: #000;
+            position: fixed; inset: 0;
+            /* avoid status bar overlap */
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
         }
 
+        #game {
+            width: 100%; height: 100%;
+            /* EJS canvas fills safe area */
+        }
+
+        /* ── Loading overlay ── */
         .loading-screen {
-            position: absolute;
-            inset: 0;
+            position: absolute; inset: 0;
             background:
-                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.08), transparent 55%),
-                radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.06), transparent 55%),
+                radial-gradient(circle at 20% 20%, rgba(255,255,255,.08), transparent 55%),
+                radial-gradient(circle at 80% 10%, rgba(255,255,255,.06), transparent 55%),
                 #0b0b0b;
             color: #f2ede5;
-            display: grid;
-            place-items: center;
-            z-index: 10;
+            display: grid; place-items: center; z-index: 10;
         }
 
         .loading-card {
-            width: min(460px, 86vw);
-            padding: 2.4rem 2.2rem;
-            border-radius: 18px;
-            border: 1px solid rgba(242, 237, 229, 0.18);
-            background: rgba(8, 8, 8, 0.72);
-            backdrop-filter: blur(6px);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+            width: min(480px, 88vw);
+            padding: 2.6rem 2.4rem;
+            border-radius: 20px;
+            border: 1px solid rgba(242,237,229,.18);
+            background: rgba(8,8,8,.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: 0 24px 56px rgba(0,0,0,.5);
             text-align: center;
         }
 
-        .loading-card h2 {
-            margin: 0 0 0.65rem;
-            font-size: 1.35rem;
-            letter-spacing: 0.04em;
-        }
-
-        .loading-card p {
-            margin: 0 0 1.4rem;
-            color: rgba(242, 237, 229, 0.72);
-            line-height: 1.5;
-        }
+        .loading-card h2 { margin: 0 0 .65rem; font-size: 1.45rem; letter-spacing: .04em; }
+        .loading-card p  { margin: 0 0 1.4rem; color: rgba(242,237,229,.72); line-height: 1.5; }
 
         .loading-bar {
-            position: relative;
-            height: 10px;
+            position: relative; height: 10px;
             border-radius: 999px;
-            background: rgba(242, 237, 229, 0.12);
+            background: rgba(242,237,229,.12);
             overflow: hidden;
         }
-
         .loading-bar::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(90deg, transparent, rgba(242, 237, 229, 0.85), transparent);
+            content: ""; position: absolute; inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(242,237,229,.85), transparent);
             transform: translateX(-100%);
             animation: loading-sweep 1.4s ease-in-out infinite;
         }
 
-        .loading-meta {
-            display: grid;
-            gap: 0.4rem;
-            margin: 1.2rem 0;
-            font-size: 0.85rem;
-            color: rgba(242, 237, 229, 0.75);
-        }
+        .loading-meta { display: grid; gap: .4rem; margin: 1.2rem 0; font-size: .88rem; color: rgba(242,237,229,.75); }
 
         .loading-steps {
-            margin: 1.2rem 0 0;
-            padding: 0;
-            list-style: none;
-            display: grid;
-            gap: 0.4rem;
-            font-size: 0.85rem;
-            color: rgba(242, 237, 229, 0.55);
-            text-align: left;
+            margin: 1.2rem 0 0; padding: 0; list-style: none;
+            display: grid; gap: .4rem;
+            font-size: .88rem; color: rgba(242,237,229,.55); text-align: left;
         }
+        .loading-steps li { display: flex; align-items: center; gap: .5rem; }
+        .loading-steps li::before { content: "•"; color: rgba(242,237,229,.35); }
+        .loading-steps li.active { color: rgba(242,237,229,.95); }
+        .loading-steps li.active::before { content: "●"; color: rgba(242,237,229,.95); }
 
-        .loading-steps li {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .loading-steps li::before {
-            content: "•";
-            color: rgba(242, 237, 229, 0.35);
-        }
-
-        .loading-steps li.active {
-            color: rgba(242, 237, 229, 0.95);
-        }
-
-        .loading-steps li.active::before {
-            content: "●";
-            color: rgba(242, 237, 229, 0.95);
-        }
-
-        .loading-hint {
-            margin-top: 1rem;
-            font-size: 0.85rem;
-            color: rgba(242, 237, 229, 0.55);
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-        }
+        .loading-hint { margin-top: 1rem; font-size: .85rem; color: rgba(242,237,229,.55); letter-spacing: .12em; text-transform: uppercase; }
 
         @keyframes loading-sweep {
-            0% {
-                transform: translateX(-100%);
-            }
-            50% {
-                transform: translateX(30%);
-            }
-            100% {
-                transform: translateX(100%);
-            }
+            0%   { transform: translateX(-100%); }
+            50%  { transform: translateX(30%); }
+            100% { transform: translateX(100%); }
         }
 
-        @media (max-width: 720px) {
-            header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .logo {
-                width: 46px;
-                height: 46px;
-            }
-
-            .actions {
-                width: 100%;
-                justify-content: flex-start;
-            }
+        @media (prefers-reduced-motion: reduce) {
+            * { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
         }
     </style>
 </head>
@@ -570,9 +399,9 @@
         <section id="box" class="dropzone" aria-live="polite">
             <input type="file" id="input" aria-label="Choose a ROM file">
             <div class="content">
-                <div class="pill">Drag & drop</div>
+                <div class="pill">Drag & drop · Tap to browse</div>
                 <h2>Load a retro game</h2>
-                <p>Drop a ROM and we’ll auto-detect the best core.</p>
+                <p>Drop a ROM and we'll auto-detect the best core.</p>
                 <div class="resume" id="resume-card" hidden>
                     <div>
                         <h3>Resume last game</h3>
@@ -612,9 +441,7 @@
             </div>
         </section>
 
-        <footer>
-            If the extension is unknown, you will be asked to choose a console core.
-        </footer>
+        <footer>If the extension is unknown, you will be asked to choose a console core.</footer>
     </main>
 
     <script>
@@ -627,306 +454,164 @@
         const resumeBtn = document.getElementById("resume-btn");
         const resumeClear = document.getElementById("resume-clear");
         const themeToggle = document.getElementById("theme-toggle");
-        const recentKey = "cle_recent";
-        const lastKey = "cle_last";
-        const themeKey = "cle_theme";
+        const recentKey = "cle_recent", lastKey = "cle_last", themeKey = "cle_theme";
 
         let inGame = false;
 
         const coreNames = {
-            nes: "Nintendo Entertainment System",
-            snes: "Super Nintendo Entertainment System",
-            n64: "Nintendo 64",
-            gb: "Nintendo Game Boy / Game Boy Color",
-            gba: "Nintendo Game Boy Advance",
-            nds: "Nintendo DS",
-            psx: "PlayStation",
-            psp: "PlayStation Portable",
-            "3do": "3DO Interactive Multiplayer",
-            vb: "Virtual Boy",
-            segaMD: "Sega Mega Drive / Genesis",
-            segaMS: "Sega Master System",
-            segaGG: "Sega Game Gear",
-            segaCD: "Sega CD",
-            sega32x: "Sega 32X",
-            segaSaturn: "Sega Saturn",
-            pce: "PC Engine / TurboGrafx-16",
-            ngp: "Neo Geo Pocket / Color",
-            arcade: "Arcade (FBNeo)",
-            mame2003: "Arcade (MAME 2003)",
-            lynx: "Atari Lynx",
-            jaguar: "Atari Jaguar",
-            atari5200: "Atari 5200",
-            atari7800: "Atari 7800",
-            atari2600: "Atari 2600"
+            nes:"Nintendo Entertainment System",snes:"Super Nintendo Entertainment System",
+            n64:"Nintendo 64",gb:"Nintendo Game Boy / Game Boy Color",gba:"Nintendo Game Boy Advance",
+            nds:"Nintendo DS",psx:"PlayStation",psp:"PlayStation Portable","3do":"3DO Interactive Multiplayer",
+            vb:"Virtual Boy",segaMD:"Sega Mega Drive / Genesis",segaMS:"Sega Master System",
+            segaGG:"Sega Game Gear",segaCD:"Sega CD",sega32x:"Sega 32X",segaSaturn:"Sega Saturn",
+            pce:"PC Engine / TurboGrafx-16",ngp:"Neo Geo Pocket / Color",arcade:"Arcade (FBNeo)",
+            mame2003:"Arcade (MAME 2003)",lynx:"Atari Lynx",jaguar:"Atari Jaguar",
+            atari5200:"Atari 5200",atari7800:"Atari 7800",atari2600:"Atari 2600"
         };
 
-        const applyTheme = (theme) => {
-            const resolved = theme || "light";
-            document.body.dataset.theme = resolved;
-            themeToggle.textContent = resolved === "dark" ? "Light mode" : "Dark mode";
-            try {
-                localStorage.setItem(themeKey, resolved);
-            } catch (error) {
-                // ignore storage errors
-            }
+        /* ── Theme ── */
+        const applyTheme = t => {
+            document.body.dataset.theme = t || "light";
+            themeToggle.textContent = t === "dark" ? "Light mode" : "Dark mode";
+            try { localStorage.setItem(themeKey, t); } catch {}
         };
-
         const initTheme = () => {
-            let stored = null;
-            try {
-                stored = localStorage.getItem(themeKey);
-            } catch (error) {
-                stored = null;
-            }
-            if (stored === "dark" || stored === "light") {
-                applyTheme(stored);
-                return;
-            }
-            const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-            applyTheme(prefersDark ? "dark" : "light");
+            let s = null;
+            try { s = localStorage.getItem(themeKey); } catch {}
+            if (s === "dark" || s === "light") { applyTheme(s); return; }
+            applyTheme(window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        };
+        themeToggle.addEventListener("click", () => applyTheme(document.body.dataset.theme === "dark" ? "light" : "dark"));
+
+        /* ── Utils ── */
+        const fmtBytes = b => {
+            if (!Number.isFinite(b)) return "Unknown size";
+            const u = ["B","KB","MB","GB"]; let v = b, i = 0;
+            while (v >= 1024 && i < u.length - 1) { v /= 1024; i++; }
+            return `${v.toFixed(v >= 10 || i === 0 ? 0 : 1)} ${u[i]}`;
         };
 
-        themeToggle.addEventListener("click", () => {
-            const next = document.body.dataset.theme === "dark" ? "light" : "dark";
-            applyTheme(next);
+        /* ── IndexedDB ── */
+        const openStore = () => new Promise((res, rej) => {
+            if (!("indexedDB" in window)) { rej(new Error("no idb")); return; }
+            const r = indexedDB.open("cle", 1);
+            r.onupgradeneeded = () => r.result.createObjectStore("roms");
+            r.onsuccess = () => res(r.result);
+            r.onerror = () => rej(r.error);
         });
+        const storeBlob = async (k, v) => { const db = await openStore(); return new Promise((res,rej) => { const tx = db.transaction("roms","readwrite"); tx.objectStore("roms").put(v,k); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); }); };
+        const readBlob  = async k => { const db = await openStore(); return new Promise((res,rej) => { const tx = db.transaction("roms","readonly"); const r = tx.objectStore("roms").get(k); r.onsuccess = () => res(r.result||null); r.onerror = () => rej(r.error); }); };
+        const clearBlob = async k => { const db = await openStore(); return new Promise((res,rej) => { const tx = db.transaction("roms","readwrite"); tx.objectStore("roms").delete(k); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); }); };
 
-        const formatBytes = (bytes) => {
-            if (!Number.isFinite(bytes)) return "Unknown size";
-            const units = ["B", "KB", "MB", "GB"];
-            let value = bytes;
-            let idx = 0;
-            while (value >= 1024 && idx < units.length - 1) {
-                value /= 1024;
-                idx += 1;
-            }
-            return `${value.toFixed(value >= 10 || idx === 0 ? 0 : 1)} ${units[idx]}`;
-        };
-
-        const openStore = () => new Promise((resolve, reject) => {
-            if (!("indexedDB" in window)) {
-                reject(new Error("IndexedDB not available"));
-                return;
-            }
-            const request = indexedDB.open("cle", 1);
-            request.onupgradeneeded = () => {
-                request.result.createObjectStore("roms");
-            };
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
-        });
-
-        const storeBlob = async (key, value) => {
-            const db = await openStore();
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction("roms", "readwrite");
-                tx.objectStore("roms").put(value, key);
-                tx.oncomplete = () => resolve();
-                tx.onerror = () => reject(tx.error);
-            });
-        };
-
-        const readBlob = async (key) => {
-            const db = await openStore();
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction("roms", "readonly");
-                const req = tx.objectStore("roms").get(key);
-                req.onsuccess = () => resolve(req.result || null);
-                req.onerror = () => reject(req.error);
-            });
-        };
-
-        const clearBlob = async (key) => {
-            const db = await openStore();
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction("roms", "readwrite");
-                tx.objectStore("roms").delete(key);
-                tx.oncomplete = () => resolve();
-                tx.onerror = () => reject(tx.error);
-            });
-        };
-
+        /* ── Recent / session ── */
         const loadRecent = () => {
             try {
                 const parsed = JSON.parse(localStorage.getItem(recentKey) || "[]");
-                if (!Array.isArray(parsed) || parsed.length === 0) {
-                    recentList.innerHTML = "<li><span>No recent games yet.</span></li>";
-                    return;
-                }
+                if (!Array.isArray(parsed) || !parsed.length) { recentList.innerHTML = "<li><span>No recent games yet.</span></li>"; return; }
                 recentList.innerHTML = "";
-                parsed.slice(0, 5).forEach(item => {
+                parsed.slice(0,5).forEach(item => {
                     const li = document.createElement("li");
                     li.textContent = item.name;
                     const meta = document.createElement("span");
                     meta.textContent = `${item.coreLabel} · ${item.size}`;
-                    li.appendChild(meta);
-                    recentList.appendChild(li);
+                    li.appendChild(meta); recentList.appendChild(li);
                 });
-            } catch (error) {
-                recentList.innerHTML = "<li><span>No recent games yet.</span></li>";
-            }
+            } catch { recentList.innerHTML = "<li><span>No recent games yet.</span></li>"; }
         };
-
-        const loadLastSession = () => {
-            try {
-                return JSON.parse(localStorage.getItem(lastKey) || "null");
-            } catch (error) {
-                return null;
-            }
-        };
-
+        const loadLastSession = () => { try { return JSON.parse(localStorage.getItem(lastKey)||"null"); } catch { return null; } };
         const updateResumeCard = async () => {
             const last = loadLastSession();
-            if (!last) {
-                resumeCard.hidden = true;
-                return;
-            }
+            if (!last) { resumeCard.hidden = true; return; }
             resumeCard.hidden = false;
-            const date = last.updatedAt ? new Date(last.updatedAt) : null;
-            const dateLabel = date ? date.toLocaleString() : "Recently";
+            const dateLabel = last.updatedAt ? new Date(last.updatedAt).toLocaleString() : "Recently";
             resumeMeta.textContent = `${last.name} · ${last.coreLabel} · ${last.size} · ${dateLabel}`;
             resumeBtn.disabled = false;
         };
-
-        const saveRecent = (entry) => {
+        const saveRecent = entry => {
             try {
-                const current = JSON.parse(localStorage.getItem(recentKey) || "[]");
-                const next = [entry, ...current.filter(item => item.name !== entry.name)];
-                localStorage.setItem(recentKey, JSON.stringify(next.slice(0, 5)));
+                const c = JSON.parse(localStorage.getItem(recentKey)||"[]");
+                localStorage.setItem(recentKey, JSON.stringify([entry, ...c.filter(i => i.name !== entry.name)].slice(0,5)));
                 loadRecent();
-            } catch (error) {
-                // ignore storage errors
-            }
+            } catch {}
         };
-
         const saveLastSession = async (entry, file) => {
-            try {
-                localStorage.setItem(lastKey, JSON.stringify(entry));
-                await storeBlob("last", file);
-                updateResumeCard();
-            } catch (error) {
-                // ignore storage errors
-            }
+            try { localStorage.setItem(lastKey, JSON.stringify(entry)); await storeBlob("last", file); updateResumeCard(); } catch {}
         };
 
-        loadRecent();
-        initTheme();
-        updateResumeCard();
+        loadRecent(); initTheme(); updateResumeCard();
 
+        /* ── Browse ── */
         browse.addEventListener("click", () => input.click());
 
+        /* ── Resume ── */
         resumeBtn.addEventListener("click", async () => {
-            resumeBtn.disabled = true;
-            resumeBtn.textContent = "Loading...";
+            resumeBtn.disabled = true; resumeBtn.textContent = "Loading...";
             try {
-                const last = loadLastSession();
-                if (!last) {
-                    resumeBtn.textContent = "Resume";
-                    return;
-                }
+                const last = loadLastSession(); if (!last) { resumeBtn.textContent = "Resume"; return; }
                 const stored = await readBlob("last");
-                if (!stored) {
-                    resumeMeta.textContent = "Resume data not found. Please reselect the ROM.";
-                    resumeBtn.textContent = "Resume";
-                    return;
-                }
+                if (!stored) { resumeMeta.textContent = "Resume data not found. Please reselect the ROM."; resumeBtn.textContent = "Resume"; return; }
                 const blob = stored instanceof Blob ? stored : stored.blob || stored;
                 const file = new File([blob], last.name, { type: blob.type || "application/octet-stream" });
                 await handleFile(file, { coreOverride: last.core });
-            } catch (error) {
-                resumeMeta.textContent = "Resume failed. Please reselect the ROM.";
-            } finally {
-                resumeBtn.textContent = "Resume";
-                resumeBtn.disabled = false;
-            }
+            } catch { resumeMeta.textContent = "Resume failed. Please reselect the ROM."; }
+            finally { resumeBtn.textContent = "Resume"; resumeBtn.disabled = false; }
         });
 
         resumeClear.addEventListener("click", async () => {
-            try {
-                localStorage.removeItem(lastKey);
-                await clearBlob("last");
-            } catch (error) {
-                // ignore errors
-            }
+            try { localStorage.removeItem(lastKey); await clearBlob("last"); } catch {}
             resumeCard.hidden = true;
         });
 
+        /* ── Core picker ── */
         const pickCore = (title, message, options) => new Promise(resolve => {
-            const button = document.createElement("button");
-            const select = document.createElement("select");
-            const wrapper = document.createElement("div");
-
-            wrapper.className = "choose-core";
-            wrapper.innerHTML = `
-                <h3>${title}</h3>
-                <p>${message}</p>
-            `;
-
-            options.forEach(({ label, value }) => {
-                const option = document.createElement("option");
-                option.value = value;
-                option.textContent = label;
-                select.appendChild(option);
+            const btn = document.createElement("button");
+            const sel = document.createElement("select");
+            const wrap = document.createElement("div");
+            wrap.className = "choose-core";
+            wrap.innerHTML = `<h3>${title}</h3><p>${message}</p>`;
+            options.forEach(({label, value}) => {
+                const o = document.createElement("option"); o.value = value; o.textContent = label; sel.appendChild(o);
             });
-
-            button.onclick = () => resolve(select[select.selectedIndex].value);
-            button.textContent = "Load game";
-            box.innerHTML = "";
-
-            wrapper.appendChild(select);
-            wrapper.appendChild(button);
-            box.appendChild(wrapper);
+            btn.onclick = () => resolve(sel[sel.selectedIndex].value);
+            btn.textContent = "Load game";
+            box.innerHTML = ""; wrap.appendChild(sel); wrap.appendChild(btn); box.appendChild(wrap);
         });
 
-        const detectCore = async (ext) => {
-            const extension = (ext || "").toLowerCase();
-            if (["fds", "nes", "unif", "unf"].includes(extension)) return "nes";
-            if (["smc", "sfc", "fig", "bsx", "swc"].includes(extension)) return "snes";
-            if (["z64", "n64", "v64"].includes(extension)) return "n64";
-            if (["gb", "gbc", "cgb"].includes(extension)) return "gb";
-            if (["gba"].includes(extension)) return "gba";
-            if (["nds"].includes(extension)) return "nds";
-            if (["vb"].includes(extension)) return "vb";
-            if (["gen", "smd", "md"].includes(extension)) return "segaMD";
-            if (["sms"].includes(extension)) return "segaMS";
-            if (["gg"].includes(extension)) return "segaGG";
-            if (["32x", "x32"].includes(extension)) return "sega32x";
-            if (["pce"].includes(extension)) return "pce";
-            if (["ngp", "ngc"].includes(extension)) return "ngp";
-            if (["lnx"].includes(extension)) return "lynx";
-            if (["a52"].includes(extension)) return "atari5200";
-            if (["a26"].includes(extension)) return "atari2600";
-            if (["a78"].includes(extension)) return "atari7800";
-            if (["j64", "jag"].includes(extension)) return "jaguar";
-
-            if (["bin", "cue", "iso", "img", "chd"].includes(extension)) {
-                return await pickCore(
-                    "Pick the console core",
-                    "This file type is shared across multiple systems.",
-                    Object.entries(coreNames).map(([value, label]) => ({ label, value }))
-                );
-            }
-
-            return await pickCore(
-                "Choose a console core",
-                "We couldn’t auto-detect this extension. Pick the closest match.",
-                Object.entries(coreNames).map(([value, label]) => ({ label, value }))
-            );
+        const detectCore = async ext => {
+            const e = (ext||"").toLowerCase();
+            if (["fds","nes","unif","unf"].includes(e)) return "nes";
+            if (["smc","sfc","fig","bsx","swc"].includes(e)) return "snes";
+            if (["z64","n64","v64"].includes(e)) return "n64";
+            if (["gb","gbc","cgb"].includes(e)) return "gb";
+            if (["gba"].includes(e)) return "gba";
+            if (["nds"].includes(e)) return "nds";
+            if (["vb"].includes(e)) return "vb";
+            if (["gen","smd","md"].includes(e)) return "segaMD";
+            if (["sms"].includes(e)) return "segaMS";
+            if (["gg"].includes(e)) return "segaGG";
+            if (["32x","x32"].includes(e)) return "sega32x";
+            if (["pce"].includes(e)) return "pce";
+            if (["ngp","ngc"].includes(e)) return "ngp";
+            if (["lnx"].includes(e)) return "lynx";
+            if (["a52"].includes(e)) return "atari5200";
+            if (["a26"].includes(e)) return "atari2600";
+            if (["a78"].includes(e)) return "atari7800";
+            if (["j64","jag"].includes(e)) return "jaguar";
+            if (["bin","cue","iso","img","chd"].includes(e))
+                return await pickCore("Pick the console core","This file type is shared across multiple systems.",Object.entries(coreNames).map(([v,l]) => ({label:l,value:v})));
+            return await pickCore("Choose a console core","We couldn't auto-detect this extension. Pick the closest match.",Object.entries(coreNames).map(([v,l]) => ({label:l,value:v})));
         };
 
-        const createLoadingOverlay = (fileName, sizeLabel, coreLabel) => {
-            const loading = document.createElement("div");
-            loading.className = "loading-screen";
-            loading.innerHTML = `
+        /* ── Loading overlay ── */
+        const createLoadingOverlay = (name, size, core) => {
+            const el = document.createElement("div");
+            el.className = "loading-screen";
+            el.innerHTML = `
                 <div class="loading-card">
                     <h2>Loading your game</h2>
                     <p>Fetching game data and warming up the emulator.</p>
                     <div class="loading-bar" aria-hidden="true"></div>
-                    <div class="loading-meta">
-                        <div>${fileName}</div>
-                        <div>${coreLabel} · ${sizeLabel}</div>
-                    </div>
+                    <div class="loading-meta"><div>${name}</div><div>${core} · ${size}</div></div>
                     <ul class="loading-steps">
                         <li data-step="file">Reading local file</li>
                         <li data-step="core">Detecting system core</li>
@@ -934,32 +619,19 @@
                         <li data-step="start">Starting game</li>
                     </ul>
                     <div class="loading-hint">Please wait</div>
-                </div>
-            `;
-            return loading;
+                </div>`;
+            return el;
         };
+        const setStep = (overlay, step) => overlay.querySelectorAll(".loading-steps li").forEach(li => li.classList.toggle("active", li.dataset.step === step));
 
-        const setActiveStep = (overlay, step) => {
-            const items = overlay.querySelectorAll(".loading-steps li");
-            items.forEach(item => {
-                if (item.dataset.step === step) {
-                    item.classList.add("active");
-                } else {
-                    item.classList.remove("active");
-                }
-            });
-        };
-
+        /* ── Main handler ── */
         const handleFile = async (file, options = {}) => {
             if (!file) return;
-
             const parts = file.name.split(".");
             const ext = parts.length > 1 ? parts.pop() : "";
             const baseName = parts.join(".") || file.name;
-
-            const sizeLabel = formatBytes(file.size);
+            const sizeLabel = fmtBytes(file.size);
             const url = URL.createObjectURL(new Blob([file]));
-
             const core = options.coreOverride || await detectCore(ext);
             const coreLabel = coreNames[core] || "Custom core";
 
@@ -968,17 +640,14 @@
             const script = document.createElement("script");
             const loading = createLoadingOverlay(file.name, sizeLabel, coreLabel);
 
-            sub.id = "game";
-            div.id = "display";
-
+            sub.id = "game"; div.id = "display";
             inGame = true;
             document.body.classList.add("in-game");
             box.remove();
-            div.appendChild(sub);
-            div.appendChild(loading);
+            div.appendChild(sub); div.appendChild(loading);
             document.body.appendChild(div);
 
-            setActiveStep(loading, "file");
+            setStep(loading, "file");
 
             window.EJS_player = "#game";
             window.EJS_gameName = baseName;
@@ -991,21 +660,13 @@
             window.EJS_onGameStart = () => loading.remove();
 
             saveRecent({ name: file.name, size: sizeLabel, coreLabel });
-            saveLastSession({
-                name: file.name,
-                size: sizeLabel,
-                core,
-                coreLabel,
-                updatedAt: Date.now()
-            }, file);
+            saveLastSession({ name: file.name, size: sizeLabel, core, coreLabel, updatedAt: Date.now() }, file);
 
-            setActiveStep(loading, "core");
-
+            setStep(loading, "core");
             script.src = "data/loader.js";
-            script.onload = () => setActiveStep(loading, "engine");
+            script.onload = () => setStep(loading, "engine");
             document.body.appendChild(script);
-
-            setTimeout(() => setActiveStep(loading, "start"), 1500);
+            setTimeout(() => setStep(loading, "start"), 1500);
             setTimeout(() => {
                 if (document.body.contains(loading)) {
                     const hint = loading.querySelector(".loading-hint");
@@ -1014,35 +675,23 @@
             }, 12000);
         };
 
-        input.onchange = async () => {
-            if (!input.files || !input.files[0]) return;
-            await handleFile(input.files[0]);
-        };
+        /* ── Input events ── */
+        input.onchange = async () => { if (input.files?.[0]) await handleFile(input.files[0]); };
 
-        const preventDefaults = (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-        };
-
-        box.addEventListener("dragover", (event) => {
-            preventDefaults(event);
-            box.setAttribute("drag", "true");
-        });
+        const prevent = e => { e.preventDefault(); e.stopPropagation(); };
+        box.addEventListener("dragover",  e => { prevent(e); box.setAttribute("drag","true"); });
         box.addEventListener("dragleave", () => box.removeAttribute("drag"));
-        box.addEventListener("drop", async (event) => {
-            preventDefaults(event);
-            box.removeAttribute("drag");
-            const file = event.dataTransfer?.files?.[0];
-            await handleFile(file);
+        box.addEventListener("drop", async e => { prevent(e); box.removeAttribute("drag"); await handleFile(e.dataTransfer?.files?.[0]); });
+
+        /* prevent scroll during game (arrow keys, space, etc.) */
+        document.addEventListener("keydown", e => {
+            if (!inGame) return;
+            if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," ","PageUp","PageDown","Home","End"].includes(e.key))
+                e.preventDefault();
         });
 
-        document.addEventListener("keydown", (event) => {
-            if (!inGame) return;
-            const blocked = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " ", "PageUp", "PageDown", "Home", "End"];
-            if (blocked.includes(event.key)) {
-                event.preventDefault();
-            }
-        });
+        /* prevent iOS overscroll bounce from disrupting game canvas touch events */
+        document.addEventListener("touchmove", e => { if (inGame) e.preventDefault(); }, { passive: false });
     </script>
 </body>
 </html>
