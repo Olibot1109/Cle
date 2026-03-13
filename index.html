@@ -246,6 +246,17 @@
         }
         #game { width: 100%; height: 100%; }
 
+        /* hide EmulatorJS bottom toolbar */
+        #game .ejs-controls-bar,
+        #game .ejs_controls_bar,
+        #game .ejs-bottom-bar,
+        #game [class*="controls-bar"],
+        #game [class*="controlsBar"],
+        .ejs-controls-bar,
+        .ejs_controls_bar,
+        .ejs-bottom,
+        .ejs_bottom { display: none !important; }
+
         /* ── Loading overlay ── */
         .loading-screen {
             position: absolute; inset: 0;
