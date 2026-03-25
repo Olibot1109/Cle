@@ -369,6 +369,7 @@ const input = $("input"), box = $("box"), browse = $("browse");
 const recentList = $("recent-list"), resumeCard = $("resume-card");
 const resumeMeta = $("resume-meta"), resumeBtn = $("resume-btn");
 const resumeClear = $("resume-clear"), themeToggle = $("theme-toggle");
+const RECENT_EMPTY_TEXT = "No recent games yet.";
 
 let inGame = false;
 
@@ -404,6 +405,9 @@ const fmtBytes = b => {
     while (v >= 1024 && i < 3) { v /= 1024; i++; }
     return `${v.toFixed(i && v < 10 ? 1 : 0)} ${u[i]}`;
 };
+const escapeHtml = v => String(v).replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[c]));
 
 // ── IndexedDB ──
 const idb = () => new Promise((res,rej) => {
@@ -420,10 +424,18 @@ const dbDel = async k => { const db = await idb(); return new Promise((res,rej) 
 const loadRecent = () => {
     try {
         const list = JSON.parse(localStorage.getItem("cle_recent")||"[]");
-        if (!list.length) { recentList.innerHTML = "<li><span>No recent games yet.</span></li>"; return; }
-        recentList.innerHTML = list.slice(0,5).map(i =>
-            `<li>${i.name}<span>${i.coreLabel} · ${i.size}</span></li>`).join("");
-    } catch { recentList.innerHTML = "<li><span>No recent games yet.</span></li>"; }
+        recentList.replaceChildren();
+        if (!list.length) { recentList.innerHTML = `<li><span>${RECENT_EMPTY_TEXT}</span></li>`; return; }
+        list.slice(0,5).forEach(i => {
+            const li = document.createElement("li");
+            const name = document.createElement("span");
+            name.textContent = i.name || "Unknown file";
+            const meta = document.createElement("span");
+            meta.textContent = `${i.coreLabel || "Unknown core"} · ${i.size || "?"}`;
+            li.append(name, meta);
+            recentList.appendChild(li);
+        });
+    } catch { recentList.innerHTML = `<li><span>${RECENT_EMPTY_TEXT}</span></li>`; }
 };
 const saveRecent = e => {
     try {
@@ -503,7 +515,7 @@ const mkOverlay = (name, size, core) => {
         <h2>Loading your game</h2>
         <p>Warming up the emulator…</p>
         <div class="loading-bar"></div>
-        <div class="loading-meta"><div>${name}</div><div>${core} · ${size}</div></div>
+        <div class="loading-meta"><div>${escapeHtml(name)}</div><div>${escapeHtml(core)} · ${escapeHtml(size)}</div></div>
         <ul class="loading-steps">
             <li data-s="file">Reading local file</li>
             <li data-s="core">Detecting system core</li>
@@ -519,10 +531,12 @@ const setStep = (ov, s) => ov.querySelectorAll("[data-s]").forEach(li => li.clas
 // ── Main ──
 const handleFile = async (file, opts={}) => {
     if (!file) return;
+    document.getElementById("display")?.remove();
+    document.querySelector('script[src="data/loader.js"]')?.remove();
     const parts = file.name.split("."), ext = parts.length>1 ? parts.pop() : "";
     const base = parts.join(".")||file.name;
     const size = fmtBytes(file.size);
-    const url = URL.createObjectURL(new Blob([file]));
+    const url = URL.createObjectURL(file);
     const core = opts.coreOverride || await detectCore(ext);
     const coreLabel = CORES[core]||"Custom core";
 
